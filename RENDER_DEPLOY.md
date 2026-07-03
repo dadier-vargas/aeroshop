@@ -38,7 +38,7 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy-render.ps1
 
 1. [Render Dashboard](https://dashboard.render.com) → **New → Blueprint**
 2. Conecta tu cuenta de GitHub y selecciona el repositorio
-3. Render leerá `render.yaml` y creará el servicio + disco persistente
+3. Render leerá `render.yaml` y creará el servicio (plan **free**, sin disco)
 4. Completa las variables marcadas como `sync: false` (ver tabla abajo)
 5. Click **Apply** y espera el build (~2-5 min)
 
@@ -54,9 +54,7 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy-render.ps1
 | Start Command | `npm start` |
 | Plan | Free |
 
-3. **Add Disk** (obligatorio para SQLite):
-   - Mount Path: `/var/data`
-   - Size: 1 GB
+3. **No agregues disco** en plan free (no está disponible). SQLite usará almacenamiento efímero.
 
 4. Variables de entorno (ver tabla)
 
@@ -70,7 +68,6 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy-render.ps1
 |----------|---------------|-------|
 | `NODE_ENV` | `production` | Ya en render.yaml |
 | `HOST` | `0.0.0.0` | Ya en render.yaml |
-| `DATABASE_PATH` | `/var/data/ecommerce.db` | Ya en render.yaml |
 | `JWT_SECRET` | *(auto-generado)* | render.yaml usa `generateValue` |
 | `STRIPE_SECRET_KEY` | `sk_test_...` | **Tú lo completas** |
 | `STRIPE_PUBLISHABLE_KEY` | `pk_test_...` | **Tú lo completas** |
@@ -107,7 +104,7 @@ powershell -ExecutionPolicy Bypass -File scripts/deploy-render.ps1
 ## Notas importantes
 
 - **Plan free**: la app se duerme tras ~15 min sin visitas (primer acceso tarda ~30s).
-- **SQLite + Disco**: sin disco adjunto, los pedidos se pierden al redeploy.
+- **SQLite en plan free**: no hay disco persistente. Los pedidos y usuarios **se reinician** en cada redeploy o cuando Render mueve la instancia. Ideal para demo; para producción real usa plan de pago + disco o una base de datos externa (PostgreSQL).
 - Para cobros reales cambia a claves `sk_live_` / `pk_live_`.
 - Si el build falla, revisa los logs en Render → Events.
 

@@ -1,5 +1,8 @@
-# Render Blueprint — AeroShop E-commerce
+# Render Blueprint — AeroShop E-commerce (plan FREE)
 # Docs: https://render.com/docs/blueprint-spec
+#
+# Nota: el plan gratuito NO admite discos persistentes.
+# SQLite usa almacenamiento efímero (los datos se reinician en cada redeploy).
 services:
   - type: web
     name: aeroshop
@@ -9,10 +12,6 @@ services:
     buildCommand: npm install --omit=dev
     startCommand: npm start
     healthCheckPath: /api/health
-    disk:
-      name: aeroshop-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
@@ -22,8 +21,6 @@ services:
         value: "true"
       - key: API_BASE_PATH
         value: /api
-      - key: DATABASE_PATH
-        value: /var/data/ecommerce.db
       - key: ALLOW_SIMULATED_PAYMENTS
         value: "false"
       - key: SEED_DEMO_USERS
