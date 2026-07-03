@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-07-03T18:16:45.764Z",
+  "metrics": {
+    "before": {
+      "loginPage": 850,
+      "checkoutPage": 1200,
+      "authLogin": 180,
+      "authRegister": 220
+    },
+    "after": {
+      "loginPage": 136.8151,
+      "authLogin": 144.97,
+      "authRegister": 126.74009999999998,
+      "checkoutPage": 267.0662
+    }
+  },
+  "totalLocalKb": "195.2"
+}

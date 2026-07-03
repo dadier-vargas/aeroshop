@@ -1,0 +1,46 @@
+# Render Blueprint — AeroShop E-commerce
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: aeroshop
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: aeroshop-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "true"
+      - key: API_BASE_PATH
+        value: /api
+      - key: DATABASE_PATH
+        value: /var/data/ecommerce.db
+      - key: ALLOW_SIMULATED_PAYMENTS
+        value: "false"
+      - key: SEED_DEMO_USERS
+        value: "true"
+      - key: OAUTH_DEV_ENABLED
+        value: "true"
+      - key: ALLOW_LOCALHOST_CORS
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

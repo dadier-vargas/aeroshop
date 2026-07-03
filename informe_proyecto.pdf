@@ -1,0 +1,1190 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R 22 0 R 24 0 R] /Count 11 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 2424 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(INFORME TECNICO DEL PROYECTO AEROSHOP) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Plataforma de comercio electronico \(E-commerce\) full-stack.) Tj
+0 -14 Td
+(Fecha del informe: Junio 2026) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Este documento describe la arquitectura, los archivos y la logica) Tj
+0 -14 Td
+(de negocio de todo el codigo contenido en la carpeta Proyecto.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Stack tecnologico:) Tj
+0 -14 Td
+(- Frontend: HTML5, CSS3, JavaScript vanilla \(SPA con hash routing\)) Tj
+0 -14 Td
+(- Backend: Node.js + Express 4) Tj
+0 -14 Td
+(- Base de datos: SQLite3) Tj
+0 -14 Td
+(- Autenticacion: JWT \(jsonwebtoken\) + bcryptjs) Tj
+0 -14 Td
+(- Dependencias: cors, express, sqlite3, bcryptjs, jsonwebtoken) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(1. ARQUITECTURA GENERAL) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(El proyecto sigue un patron monolitico desacoplado:) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+([Navegador] <--HTTP--> [Express API + Static Files] <--SQL--> [SQLite]) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(El servidor Express \(backend/app.js\) cumple dos funciones:) Tj
+0 -14 Td
+(a\) Servir la API REST bajo el prefijo /api) Tj
+0 -14 Td
+(b\) Servir los archivos estaticos del frontend desde frontend/) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(El frontend es una SPA \(Single Page Application\) que usa el hash) Tj
+0 -14 Td
+(de la URL \(#home, #login, #checkout, etc.\) para navegar sin recargar.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Separacion de responsabilidades en el backend:) Tj
+0 -14 Td
+(routes/     -> Definen endpoints HTTP y middleware) Tj
+0 -14 Td
+(controllers/-> Logica de negocio y respuestas JSON) Tj
+0 -14 Td
+(services/   -> Servicios externos simulados \(pagos, notificaciones\)) Tj
+0 -14 Td
+(middleware/ -> Autenticacion JWT y control de roles) Tj
+0 -14 Td
+(config/     -> Conexion y helpers de base de datos) Tj
+0 -14 Td
+(db/         -> Esquema SQL y datos semilla) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Modo demostracion offline: api.js incluye un motor MockDB que) Tj
+0 -14 Td
+(emula toda la API en localStorage si el backend no esta disponible.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(2. ESTRUCTURA DE CARPETAS) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Proyecto/) Tj
+0 -14 Td
+(index.html          -> Copia/entrada alternativa del frontend) Tj
+0 -14 Td
+(package.json        -> Scripts raiz: npm start, npm test) Tj
+0 -14 Td
+(informe_proyecto.pdf-> Este informe) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(frontend/) Tj
+0 -14 Td
+(index.html        -> Pagina principal de la SPA) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 2500 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(css/styles.css    -> Estilos globales \(tema oscuro, glassmorphism\)) Tj
+0 -14 Td
+(js/api.js         -> Cliente HTTP + simulacion offline) Tj
+0 -14 Td
+(js/auth.js        -> Gestion de sesion en localStorage) Tj
+0 -14 Td
+(js/views.js       -> Plantillas HTML de cada vista) Tj
+0 -14 Td
+(js/app.js         -> Router, carrito, notificaciones, eventos) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(backend/) Tj
+0 -14 Td
+(server.js         -> Punto de entrada, puerto 5000, graceful shutdown) Tj
+0 -14 Td
+(app.js            -> Configuracion Express y montaje de rutas) Tj
+0 -14 Td
+(package.json      -> Dependencias del backend) Tj
+0 -14 Td
+(config/database.js-> Conexion SQLite, dbQuery async, auto-seed) Tj
+0 -14 Td
+(db/schema.sql     -> DDL de 8 tablas) Tj
+0 -14 Td
+(db/seed.sql       -> Datos iniciales \(productos, usuarios, cupones\)) Tj
+0 -14 Td
+(controllers/      -> 6 controladores de dominio) Tj
+0 -14 Td
+(routes/           -> 7 routers Express) Tj
+0 -14 Td
+(middleware/       -> authMiddleware.js \(protect, isAdmin\)) Tj
+0 -14 Td
+(services/         -> paymentService.js, notifyService.js) Tj
+0 -14 Td
+(tests/            -> integration.test.js \(pruebas E2E\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(scripts/) Tj
+0 -14 Td
+(generate_report_pdf.js -> Generador de este PDF) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(.vscode/launch.json -> Configuracion de depuracion VS Code) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(3. BASE DE DATOS \(schema.sql\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(SQLite con claves foraneas activadas \(PRAGMA foreign_keys = ON\).) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla users:) Tj
+0 -14 Td
+(id, email \(UNIQUE\), password_hash, full_name, role \(client|admin\),) Tj
+0 -14 Td
+(auth_provider \(email|google|apple\), created_at) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla categories:) Tj
+0 -14 Td
+(id, name, description, slug \(UNIQUE\), created_at) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla products:) Tj
+0 -14 Td
+(id, name, description, price, stock, image_url, category_id \(FK\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla coupons:) Tj
+0 -14 Td
+(id, code \(UNIQUE\), discount_type \(percentage|fixed\),) Tj
+0 -14 Td
+(discount_value, min_order_value, active, expires_at) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla orders:) Tj
+0 -14 Td
+(id, user_id \(FK\), status, total_amount, discount_amount,) Tj
+0 -14 Td
+(final_amount, coupon_id \(FK\), payment_method, payment_status,) Tj
+0 -14 Td
+(tracking_number \(UNIQUE\), created_at) Tj
+0 -14 Td
+(Estados: pending, paid, shipped, delivered, cancelled,) Tj
+0 -14 Td
+(refund_requested, refunded) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 2143 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+() Tj
+0 -14 Td
+(Tabla order_items:) Tj
+0 -14 Td
+(id, order_id \(FK CASCADE\), product_id \(FK RESTRICT\),) Tj
+0 -14 Td
+(quantity, unit_price, total_price) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla refunds:) Tj
+0 -14 Td
+(id, order_id \(FK\), reason, status \(pending|approved|rejected\),) Tj
+0 -14 Td
+(requested_at, processed_at, admin_notes) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Tabla notifications:) Tj
+0 -14 Td
+(id, user_id \(FK CASCADE\), message, is_read, type, created_at) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(4. DATOS SEMILLA \(seed.sql\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(4 categorias: Tecnologia, Moda, Hogar y Cocina, Deportes y Fitness.) Tj
+0 -14 Td
+(10 productos de ejemplo con precios en pesos colombianos \(COP\).) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Usuarios predefinidos:) Tj
+0 -14 Td
+(Admin:   admin@ecommerce.com / admin123 \(rol: admin\)) Tj
+0 -14 Td
+(Cliente: cliente@ecommerce.com / client123 \(rol: client\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Cupones de prueba:) Tj
+0 -14 Td
+(DESCUENTO10 -> 10% descuento, minimo $50.000) Tj
+0 -14 Td
+(SALE50K     -> $50.000 fijos, minimo $300.000) Tj
+0 -14 Td
+(BIENVENIDA  -> 15% descuento, sin minimo) Tj
+0 -14 Td
+(CADUCADO    -> Cupon inactivo para pruebas de error) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(database.js inicializa automaticamente:) Tj
+0 -14 Td
+(1. Ejecuta schema.sql al arrancar) Tj
+0 -14 Td
+(2. Si categories esta vacia, ejecuta seed.sql) Tj
+0 -14 Td
+(3. Expone dbQuery con metodos run/get/all/exec en Promises) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(5. BACKEND - server.js y app.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(server.js:) Tj
+0 -14 Td
+(- Importa app y la conexion db) Tj
+0 -14 Td
+(- Escucha en PORT \(env o 5000 por defecto\)) Tj
+0 -14 Td
+(- Maneja SIGTERM/SIGINT para cierre graceful:) Tj
+0 -14 Td
+(cierra servidor HTTP y luego la conexion SQLite) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(app.js:) Tj
+0 -14 Td
+(- Middleware: cors\(\), express.json\(\)) Tj
+0 -14 Td
+(- express.static sirve frontend/ en la raiz) Tj
+0 -14 Td
+(- Monta routers bajo /api/*) Tj
+0 -14 Td
+(- GET /api/health -> estado del servicio) Tj
+0 -14 Td
+(- Middleware global de errores -> JSON 500) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Rutas montadas:) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 2381 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(/api/auth          -> authRoutes) Tj
+0 -14 Td
+(/api/products      -> productRoutes) Tj
+0 -14 Td
+(/api/categories    -> categoryRoutes) Tj
+0 -14 Td
+(/api/orders        -> orderRoutes \(protegidas\)) Tj
+0 -14 Td
+(/api/refunds       -> refundRoutes \(protegidas\)) Tj
+0 -14 Td
+(/api/notifications -> notificationRoutes \(protegidas\)) Tj
+0 -14 Td
+(/api/admin         -> adminRoutes \(admin only\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(6. BACKEND - AUTENTICACION) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(authMiddleware.js:) Tj
+0 -14 Td
+(protect: Lee header Authorization: Bearer <token>,) Tj
+0 -14 Td
+(verifica JWT con JWT_SECRET, adjunta req.user) Tj
+0 -14 Td
+(isAdmin: Verifica req.user.role === admin) Tj
+0 -14 Td
+(JWT_SECRET: variable de entorno o valor por defecto de desarrollo) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(authController.js:) Tj
+0 -14 Td
+(register: Valida email/password/fullName, hashea con bcrypt,) Tj
+0 -14 Td
+(crea usuario rol client, retorna JWT 24h) Tj
+0 -14 Td
+(login:    Compara hash bcrypt, rechaza cuentas OAuth-only) Tj
+0 -14 Td
+(oauth:    Simula Google/Apple; crea o vincula usuario existente) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(authRoutes.js:) Tj
+0 -14 Td
+(POST /register, POST /login, POST /oauth \(publicas\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Flujo frontend \(auth.js\):) Tj
+0 -14 Td
+(setSession\(token, user\) -> localStorage aero_token, aero_user) Tj
+0 -14 Td
+(logout\(\) -> limpia storage y dispara evento authChange) Tj
+0 -14 Td
+(isAuthenticated\(\), getUser\(\), isAdmin\(\) -> helpers de sesion) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(7. BACKEND - PRODUCTOS Y CATEGORIAS) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(productController.js:) Tj
+0 -14 Td
+(getProducts: JOIN products+categories, filtros ?category y ?search) Tj
+0 -14 Td
+(getProductById: Producto individual con category_name) Tj
+0 -14 Td
+(getCategories: Lista ordenada por nombre) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(productRoutes.js:) Tj
+0 -14 Td
+(GET /           -> listado con filtros) Tj
+0 -14 Td
+(GET /:id        -> detalle \(publicas\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(categoryRoutes.js:) Tj
+0 -14 Td
+(GET /           -> todas las categorias \(publica\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(adminController.js \(CRUD productos, solo admin\):) Tj
+0 -14 Td
+(createProduct: Valida categoria, inserta producto) Tj
+0 -14 Td
+(updateProduct: Actualizacion parcial de campos) Tj
+0 -14 Td
+(deleteProduct: DELETE con manejo de FK RESTRICT) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 13 0 R >>
+endobj
+13 0 obj
+<< /Length 2149 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(\(409 si el producto tiene pedidos historicos\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(adminRoutes productos:) Tj
+0 -14 Td
+(POST   /admin/products) Tj
+0 -14 Td
+(PUT    /admin/products/:id) Tj
+0 -14 Td
+(DELETE /admin/products/:id) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(8. BACKEND - PEDIDOS Y CUPONES) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(orderController.js - validateCoupon:) Tj
+0 -14 Td
+(Verifica existencia, activo, fecha expiracion, monto minimo) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(orderController.js - createOrder \(transaccional\):) Tj
+0 -14 Td
+(1. BEGIN TRANSACTION) Tj
+0 -14 Td
+(2. Valida stock de cada item del carrito) Tj
+0 -14 Td
+(3. Calcula total y aplica cupon si es valido) Tj
+0 -14 Td
+(4. INSERT orders \(pending\) + order_items) Tj
+0 -14 Td
+(5. Decrementa stock de productos) Tj
+0 -14 Td
+(6. COMMIT) Tj
+0 -14 Td
+(7. Llama PaymentService.processPayment\(\)) Tj
+0 -14 Td
+(8a. Exito: status=paid, notifica al usuario) Tj
+0 -14 Td
+(8b. Fallo: ROLLBACK stock, status=cancelled, notifica error) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(orderController.js - consultas:) Tj
+0 -14 Td
+(getMyOrders: Historial del usuario autenticado) Tj
+0 -14 Td
+(getOrderById: Detalle + items + refund; solo dueno o admin) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(orderRoutes.js \(todas con protect\):) Tj
+0 -14 Td
+(POST /coupons/validate) Tj
+0 -14 Td
+(POST /) Tj
+0 -14 Td
+(GET  /my-orders) Tj
+0 -14 Td
+(GET  /:id) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(9. BACKEND - REEMBOLSOS Y ADMIN) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(refundController.js - requestRefund \(cliente\):) Tj
+0 -14 Td
+(Valida pedido paid/delivered, sin solicitud previa) Tj
+0 -14 Td
+(INSERT refund pending, UPDATE order refund_requested) Tj
+0 -14 Td
+(Notifica cliente y administradores) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(refundController.js - processRefund \(admin\):) Tj
+0 -14 Td
+(approve: PaymentService.processRefund\(\), repone stock,) Tj
+0 -14 Td
+(status order=refunded, notifica cliente) Tj
+0 -14 Td
+(reject:  status refund=rejected, order vuelve a paid) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(adminController.js adicional:) Tj
+0 -14 Td
+(getUsers: Lista usuarios sin password_hash) Tj
+0 -14 Td
+(getOrders: Todos los pedidos con datos del cliente) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 15 0 R >>
+endobj
+15 0 obj
+<< /Length 2112 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(updateOrderStatus: Cambia estado y notifica \(shipped, etc.\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(adminRoutes \(protect + isAdmin\):) Tj
+0 -14 Td
+(GET  /users, GET /orders, GET /refunds) Tj
+0 -14 Td
+(POST /refunds/:id/process) Tj
+0 -14 Td
+(PUT  /orders/:id/status) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(10. BACKEND - SERVICIOS) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(paymentService.js \(simulacion de pasarela\):) Tj
+0 -14 Td
+(processPayment\(method, amount, details\):) Tj
+0 -14 Td
+(card:   Requiere cardNumber, expiryDate, cvv) Tj
+0 -14 Td
+(Falla si cardNumber termina en 9999) Tj
+0 -14 Td
+(pse:    Requiere bankName, userDocument) Tj
+0 -14 Td
+(Falla si bankName contiene "rechazo") Tj
+0 -14 Td
+(wallet: Requiere phoneNumber, otpCode) Tj
+0 -14 Td
+(Falla si otpCode === 0000) Tj
+0 -14 Td
+(Latencia simulada: 500ms) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(processRefund\(trackingNumber, amount\):) Tj
+0 -14 Td
+(Siempre exitoso, latencia 400ms, genera refundId) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(notifyService.js:) Tj
+0 -14 Td
+(create\(userId, message, type\) -> INSERT notifications) Tj
+0 -14 Td
+(getByUser\(userId\) -> SELECT ordenado por fecha DESC) Tj
+0 -14 Td
+(markAsRead\(id, userId\) -> UPDATE is_read=1 con validacion) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(notificationController.js + notificationRoutes:) Tj
+0 -14 Td
+(GET  /notifications       \(protegida\)) Tj
+0 -14 Td
+(PUT  /notifications/:id/read \(protegida\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(11. FRONTEND - index.html) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Estructura HTML estatica de la SPA AeroShop:) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(<header class="navbar">) Tj
+0 -14 Td
+(Logo, links: Catalogo, Mis Pedidos \(cliente\), Admin \(admin\)) Tj
+0 -14 Td
+(Campana de notificaciones con dropdown) Tj
+0 -14 Td
+(Boton carrito con badge de cantidad) Tj
+0 -14 Td
+(Boton login / avatar de usuario) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(<main id="app">) Tj
+0 -14 Td
+(Contenedor donde el router inyecta vistas dinamicamente) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(<div id="cart-drawer-overlay">) Tj
+0 -14 Td
+(Drawer lateral: items, cupones, subtotal, checkout) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(<div id="toast-container">) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 17 0 R >>
+endobj
+17 0 obj
+<< /Length 2331 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(Notificaciones toast temporales) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Scripts cargados en orden:) Tj
+0 -14 Td
+(api.js -> auth.js -> views.js -> app.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Recursos externos: Google Fonts \(Outfit, Inter\), Font Awesome 6) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(12. FRONTEND - api.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Cliente HTTP centralizado \(API_BASE_URL = localhost:5000/api\).) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Metodos: get, post, put, delete con headers JSON + Bearer token.) Tj
+0 -14 Td
+(handleResponse: Parsea JSON, en 401 limpia sesion y dispara authChange.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Fallback offline \(useLocalMock\):) Tj
+0 -14 Td
+(Si fetch falla, activa MockDB en localStorage y muestra banner.) Tj
+0 -14 Td
+(MockDB.init\(\) crea categorias, productos, usuarios, cupones,) Tj
+0 -14 Td
+(pedidos vacios, notificaciones de bienvenida.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(mockRequest\(\) replica endpoints del backend:) Tj
+0 -14 Td
+(Productos, categorias, auth, cupones, pedidos, reembolsos,) Tj
+0 -14 Td
+(notificaciones y todas las rutas admin.) Tj
+0 -14 Td
+(Incluye logica de pago fallido \(9999, OTP 0000, banco rechazo\)) Tj
+0 -14 Td
+(y control de integridad al eliminar productos con pedidos.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Latencia simulada: 300ms en modo mock.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(13. FRONTEND - views.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Motor de plantillas HTML \(objeto Views\):) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(formatCurrency\(value\) -> formato COP es-CO) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Vistas publicas:) Tj
+0 -14 Td
+(Home\(products, categories\) -> grid con busqueda y filtro) Tj
+0 -14 Td
+(ProductDetail\(product\) -> ficha con selector de cantidad) Tj
+0 -14 Td
+(Login\(\) / Register\(\) -> formularios + botones OAuth simulados) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Vistas autenticadas \(cliente\):) Tj
+0 -14 Td
+(Checkout\(\) -> acordeon 2 pasos: envio + pago \(card/pse/wallet\)) Tj
+0 -14 Td
+(CheckoutSuccess\(\) -> confirmacion con tracking number) Tj
+0 -14 Td
+(Orders\(\) -> tabla historial de pedidos) Tj
+0 -14 Td
+(OrderDetail\(\) -> timeline, items, formulario reembolso) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Vista admin:) Tj
+0 -14 Td
+(Admin\(tab, data\) -> sidebar con 4 pestanas:) Tj
+0 -14 Td
+(products: tabla CRUD con botones editar/eliminar) Tj
+0 -14 Td
+(orders: selector de estado por pedido) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 19 0 R >>
+endobj
+19 0 obj
+<< /Length 2341 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(refunds: aprobar/rechazar solicitudes pendientes) Tj
+0 -14 Td
+(users: listado de cuentas registradas) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(14. FRONTEND - app.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Controlador principal de la SPA:) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(AppState global:) Tj
+0 -14 Td
+(cart[], appliedCoupon, activeCheckoutStep, currentAdminTab) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(CartManager:) Tj
+0 -14 Td
+(Persiste carrito en localStorage \(aero_cart\)) Tj
+0 -14 Td
+(addToCart, removeFromCart, updateQuantity, clear) Tj
+0 -14 Td
+(calculateTotals\(\) con descuentos de cupon) Tj
+0 -14 Td
+(updateUI\(\) renderiza drawer lateral) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(NotificationManager:) Tj
+0 -14 Td
+(Polling cada 30s de /notifications si hay sesion) Tj
+0 -14 Td
+(renderNotifications\(\), markAsRead\(\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(router\(\): Navegacion por hash) Tj
+0 -14 Td
+(# / #product/:id / #login / #register / #checkout) Tj
+0 -14 Td
+(#orders / #orders/:id / #admin/:tab) Tj
+0 -14 Td
+(Protege rutas privadas redirigiendo a #login) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(setupHomeEvents, setupDetailEvents, setupLoginEvents, etc.:) Tj
+0 -14 Td
+(Vinculan eventos DOM despues de renderizar cada vista) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Modales dinamicos: openProductModal\(\), openRefundModal\(\)) Tj
+0 -14 Td
+(setupGlobalUI\(\): carrito, cupones, notificaciones, navbar) Tj
+0 -14 Td
+(updateNavbarAuthUI\(\): muestra/oculta links segun rol) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Inicializacion en DOMContentLoaded: cart, UI, router, hashchange) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(15. FRONTEND - styles.css y auth.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(styles.css \(no listado linea a linea\):) Tj
+0 -14 Td
+(Define variables CSS \(--primary, --danger, --success, etc.\)) Tj
+0 -14 Td
+(Tema oscuro premium con efecto glass \(backdrop-filter\)) Tj
+0 -14 Td
+(Componentes: navbar, cards, product-grid, cart-drawer,) Tj
+0 -14 Td
+(checkout-steps, admin-grid, modals, toasts, tablas, badges) Tj
+0 -14 Td
+(Animaciones: spinner de carga, transiciones del drawer) Tj
+0 -14 Td
+(Responsive: grid adaptativo para catalogo y checkout) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(auth.js:) Tj
+0 -14 Td
+(Modulo minimo de 59 lineas para gestion de sesion.) Tj
+0 -14 Td
+(Almacena JWT en aero_token y datos de usuario en aero_user.) Tj
+0 -14 Td
+(Dispara evento personalizado authChange al login/logout) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 21 0 R >>
+endobj
+21 0 obj
+<< /Length 2140 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(para que app.js actualice navbar y re-renderice rutas.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(index.html \(raiz Proyecto/\):) Tj
+0 -14 Td
+(Duplicado funcional de frontend/index.html con rutas css/js) Tj
+0 -14 Td
+(relativas a la carpeta frontend \(css/, js/\).) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(16. FLUJOS PRINCIPALES DE NEGOCIO) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Flujo de compra:) Tj
+0 -14 Td
+(1. Usuario navega catalogo, agrega productos al carrito) Tj
+0 -14 Td
+(2. Opcionalmente aplica cupon \(requiere login\)) Tj
+0 -14 Td
+(3. Checkout: datos envio + metodo de pago) Tj
+0 -14 Td
+(4. POST /api/orders -> reserva stock, procesa pago) Tj
+0 -14 Td
+(5. Exito: carrito vacio, pantalla confirmacion, notificacion) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Flujo de reembolso:) Tj
+0 -14 Td
+(1. Cliente ve pedido paid/delivered en #orders/:id) Tj
+0 -14 Td
+(2. Envía motivo -> POST /api/refunds) Tj
+0 -14 Td
+(3. Admin revisa en #admin/refunds) Tj
+0 -14 Td
+(4. Aprueba -> reversa pago simulada + stock repuesto) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Flujo admin productos:) Tj
+0 -14 Td
+(1. Admin accede a #admin/products) Tj
+0 -14 Td
+(2. CRUD via modales -> POST/PUT/DELETE /api/admin/products) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Estados de pedido \(ciclo de vida\):) Tj
+0 -14 Td
+(pending -> paid -> shipped -> delivered) Tj
+0 -14 Td
+(paid -> refund_requested -> refunded \(via reembolso\)) Tj
+0 -14 Td
+(pending -> cancelled \(pago fallido o admin\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(17. API REST - RESUMEN DE ENDPOINTS) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(PUBLICOS:) Tj
+0 -14 Td
+(GET  /api/health) Tj
+0 -14 Td
+(POST /api/auth/register | /login | /oauth) Tj
+0 -14 Td
+(GET  /api/products, /api/products/:id) Tj
+0 -14 Td
+(GET  /api/categories) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(PROTEGIDOS \(Bearer JWT\):) Tj
+0 -14 Td
+(POST /api/orders/coupons/validate) Tj
+0 -14 Td
+(POST /api/orders) Tj
+0 -14 Td
+(GET  /api/orders/my-orders, /api/orders/:id) Tj
+0 -14 Td
+(POST /api/refunds) Tj
+0 -14 Td
+(GET  /api/notifications) Tj
+0 -14 Td
+(PUT  /api/notifications/:id/read) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(SOLO ADMIN \(JWT + role admin\):) Tj
+0 -14 Td
+(GET    /api/admin/users | /orders | /refunds) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+22 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 23 0 R >>
+endobj
+23 0 obj
+<< /Length 2232 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(POST   /api/admin/products | /refunds/:id/process) Tj
+0 -14 Td
+(PUT    /api/admin/products/:id | /orders/:id/status) Tj
+0 -14 Td
+(DELETE /api/admin/products/:id) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Codigos de error habituales:) Tj
+0 -14 Td
+(400 validacion, 401 sin token, 403 sin permisos,) Tj
+0 -14 Td
+(404 no encontrado, 409 conflicto FK, 500 error servidor) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(18. PRUEBAS DE INTEGRACION) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(backend/tests/integration.test.js:) Tj
+0 -14 Td
+(Levanta servidor en puerto 5099 y ejecuta pruebas E2E con fetch.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Modulos probados:) Tj
+0 -14 Td
+(1. Auth: registro, duplicados, login cliente y admin) Tj
+0 -14 Td
+(2. Productos: listado, filtros, detalle por ID) Tj
+0 -14 Td
+(3. Pedidos: validacion cupon, creacion con pago exitoso) Tj
+0 -14 Td
+(4. Pedidos: pago fallido \(tarjeta 9999\) y restauracion stock) Tj
+0 -14 Td
+(5. Reembolsos: solicitud cliente, aprobacion admin) Tj
+0 -14 Td
+(6. Admin: CRUD productos, cambio estado pedido) Tj
+0 -14 Td
+(7. Notificaciones: listado y marcar como leida) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Ejecutar: npm test \(desde raiz o backend/\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Escenarios de pago para pruebas manuales:) Tj
+0 -14 Td
+(Tarjeta terminada en 9999 -> pago rechazado) Tj
+0 -14 Td
+(OTP wallet 0000 -> pago rechazado) Tj
+0 -14 Td
+(Banco "Banco de Rechazo" en PSE -> pago rechazado) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(19. COMO EJECUTAR EL PROYECTO) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Requisitos: Node.js 18+ instalado.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Pasos:) Tj
+0 -14 Td
+(1. cd Proyecto/backend && npm install) Tj
+0 -14 Td
+(2. cd .. && npm start) Tj
+0 -14 Td
+(\(ejecuta node backend/server.js en puerto 5000\)) Tj
+0 -14 Td
+(3. Abrir navegador en http://localhost:5000) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Alternativa sin backend:) Tj
+0 -14 Td
+(Abrir frontend/index.html directamente en el navegador.) Tj
+0 -14 Td
+(api.js activara modo demostracion local automaticamente.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(Variables de entorno opcionales:) Tj
+0 -14 Td
+(PORT=5000          -> puerto del servidor) Tj
+0 -14 Td
+(JWT_SECRET=...     -> clave para firmar tokens JWT) Tj
+0 -14 Td
+(NODE_ENV=production -> modo de ejecucion) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+24 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 25 0 R >>
+endobj
+25 0 obj
+<< /Length 1166 >>
+stream
+BT
+/F1 11 Tf
+50 750 Td
+(Depuracion VS Code:) Tj
+0 -14 Td
+(.vscode/launch.json configura arranque del server.js) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(20. CONCLUSION) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(AeroShop es una plataforma E-commerce educativa y funcional que) Tj
+0 -14 Td
+(demuestra patrones profesionales de desarrollo web:) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(- Arquitectura en capas \(routes/controllers/services\)) Tj
+0 -14 Td
+(- Autenticacion JWT con control de roles) Tj
+0 -14 Td
+(- Transacciones SQL para consistencia de inventario) Tj
+0 -14 Td
+(- SPA con routing del lado cliente) Tj
+0 -14 Td
+(- Degradacion graceful con mock offline en frontend) Tj
+0 -14 Td
+(- Simulacion realista de pasarela de pagos y reembolsos) Tj
+0 -14 Td
+(- Panel administrativo completo \(CRUD, pedidos, reembolsos\)) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(El codigo esta organizado para facilitar extension futura:) Tj
+0 -14 Td
+(sustituir PaymentService por una pasarela real \(Stripe, PayU\),) Tj
+0 -14 Td
+(migrar SQLite a PostgreSQL, o separar frontend en React/Vue.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(--- Fin del informe ---) Tj
+0 -14 Td
+(Generado automaticamente por scripts/generate_report_pdf.js) Tj
+0 -14 Td
+ET
+
+endstream
+endobj
+xref
+0 26
+0000000000 65535 f 
+0000000019 00000 n 
+0000000068 00000 n 
+0000000194 00000 n 
+0000000264 00000 n 
+0000000390 00000 n 
+0000002866 00000 n 
+0000002992 00000 n 
+0000005544 00000 n 
+0000005670 00000 n 
+0000007865 00000 n 
+0000007993 00000 n 
+0000010427 00000 n 
+0000010555 00000 n 
+0000012757 00000 n 
+0000012885 00000 n 
+0000015050 00000 n 
+0000015178 00000 n 
+0000017562 00000 n 
+0000017690 00000 n 
+0000020084 00000 n 
+0000020212 00000 n 
+0000022405 00000 n 
+0000022533 00000 n 
+0000024818 00000 n 
+0000024946 00000 n 
+trailer << /Size 26 /Root 1 0 R >>
+startxref
+26165
+%%EOF

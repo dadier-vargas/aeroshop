@@ -1,0 +1,35 @@
+{
+  "name": "aeroshop-ecommerce",
+  "version": "1.0.0",
+  "description": "Plataforma de E-commerce AeroShop",
+  "scripts": {
+    "start": "node backend/server.js",
+    "start:prod": "node scripts/validate-production-env.js && node backend/server.js",
+    "validate:prod": "node scripts/validate-production-env.js",
+    "setup:prod": "node scripts/setup-production-env.js --write",
+    "test": "node backend/tests/integration.test.js",
+    "audit:perf": "node scripts/performance-audit.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "spa",
+    "express",
+    "sqlite3",
+    "jwt"
+  ],
+  "author": "Antigravity",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7",
+    "stripe": "^16.2.0"
+  }
+}

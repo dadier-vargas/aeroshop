@@ -1,0 +1,22 @@
+# Secretos y configuración local
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+node_modules/
+
+# Base de datos local
+backend/db/ecommerce.db
+backend/db/*.db-journal
+
+# Logs y caché
+logs/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
