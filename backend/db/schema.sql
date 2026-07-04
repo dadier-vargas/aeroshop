@@ -8,7 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL,
     full_name TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'client', -- 'client' o 'admin'
-    auth_provider TEXT NOT NULL DEFAULT 'email', -- 'email', 'google', 'apple'
+    auth_provider TEXT NOT NULL DEFAULT 'email', -- provider: 'email', 'google', 'apple'
+    provider_id TEXT, -- ID único de Google/Apple; NULL para usuarios email/contraseña
+    avatar TEXT, -- URL foto de perfil (opcional)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

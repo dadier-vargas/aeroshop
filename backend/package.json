@@ -5,15 +5,23 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/integration.test.js"
+    "test": "node tests/integration.test.js",
+    "test:oauth": "node tests/oauth-user.test.js",
+    "test:oauth-state": "node tests/oauth-state.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.5.0",
+    "express-session": "^1.19.0",
+    "google-auth-library": "^10.9.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^4.1.0",
+    "passport": "^0.7.0",
+    "passport-apple": "^2.0.2",
+    "passport-google-oauth20": "^2.0.0",
     "sqlite3": "^5.1.7",
     "stripe": "^16.2.0"
   }

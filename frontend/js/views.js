@@ -201,6 +201,19 @@ const Views = {
         </div>
 
         <div id="register-error" class="auth-error" role="alert" hidden></div>
+
+        <div class="oauth-buttons">
+          <button type="button" class="btn-oauth btn-oauth--google" id="btn-google-login" aria-label="Registrarse con Google">
+            <span class="btn-oauth__icon">${OAuthIcons.google}</span>
+            <span class="btn-oauth__text">Registrarse con Google</span>
+          </button>
+          <button type="button" class="btn-oauth btn-oauth--apple" id="btn-apple-login" aria-label="Registrarse con Apple">
+            <span class="btn-oauth__icon">${OAuthIcons.apple}</span>
+            <span class="btn-oauth__text">Registrarse con Apple</span>
+          </button>
+        </div>
+
+        <div class="auth-divider">o regístrate con tu correo</div>
         
         <form id="register-form" novalidate>
           <div class="form-group">

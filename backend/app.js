@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const session = require('express-session');
+const passport = require('passport');
 const path = require('path');
 
 // Importar rutas
@@ -16,6 +18,12 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 // Importar manejador de Webhook de Stripe (requiere body crudo)
 const { handleStripeWebhook } = require('./controllers/webhookController');
+const PaymentService = require('./services/paymentService');
+const OAuthService = require('./services/oauthService');
+const { configurePassport } = require('./config/passport');
+const { getOAuthRedirectUris } = require('./config/oauthUrls');
+
+configurePassport();
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -30,12 +38,12 @@ const helmetOptions = {
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://js.stripe.com'],
+      scriptSrc: ["'self'", 'https://js.stripe.com', 'https://accounts.google.com', 'https://appleid.cdn-apple.com'],
       styleSrc: ["'self'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com', "'unsafe-inline'"],
       fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
       imgSrc: ["'self'", 'https:', 'data:'],
-      connectSrc: ["'self'", 'https://api.stripe.com'],
-      frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com']
+      connectSrc: ["'self'", 'https://api.stripe.com', 'https://accounts.google.com', 'https://appleid.apple.com'],
+      frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com', 'https://accounts.google.com', 'https://appleid.apple.com']
     }
   },
   crossOriginEmbedderPolicy: false
@@ -91,13 +99,32 @@ app.post(
   handleStripeWebhook
 );
 
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '100kb' }));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'aeroshop-oauth-session',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: isProduction,
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000,
+      sameSite: 'lax'
+    }
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Rutas de la API
 app.use('/api/auth', authLimiter, authRoutes);
+// Alias sin prefijo /api (rutas: GET /auth/google, /auth/google/callback, etc.)
+app.use('/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
@@ -126,7 +153,18 @@ app.get('/api/config/public', (req, res) => {
     apiBaseUrl: process.env.API_BASE_PATH || '/api',
     publishableKey: publishableKey.trim(),
     allowOfflineMock: !isProduction,
-    environment: isProduction ? 'production' : 'development'
+    allowSimulatedPayments: PaymentService.isSimulationAllowed('pse'),
+    environment: isProduction ? 'production' : 'development',
+    googleClientId: (process.env.GOOGLE_CLIENT_ID || '').trim(),
+    appleClientId: (process.env.APPLE_CLIENT_ID || '').trim(),
+    oauthProviders: OAuthService.getPublicProviderConfig(),
+    oauthRoutes: {
+      google: '/auth/google',
+      googleCallback: '/auth/google/callback',
+      apple: '/auth/apple',
+      appleCallback: '/auth/apple/callback'
+    },
+    oauthRedirectUris: getOAuthRedirectUris()
   });
 });
 

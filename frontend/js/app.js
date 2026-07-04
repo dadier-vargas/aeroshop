@@ -11,22 +11,62 @@ const AppState = {
   stripe: null,
   stripePublishableKey: null,
   stripeCardElement: null,
-  stripeCardComplete: false
+  stripeCardComplete: false,
+  publicConfig: null
 };
 
-// Carga la clave pública de Stripe desde el backend (nunca la secreta)
-async function loadStripeConfig() {
+function normalizeProductId(id) {
+  const n = Number(id);
+  return Number.isFinite(n) ? n : id;
+}
+
+function normalizeCartItem(item) {
+  const stockLimit = Number(item.stockLimit);
+  return {
+    ...item,
+    productId: normalizeProductId(item.productId),
+    quantity: Number(item.quantity) || 1,
+    price: Number(item.price) || 0,
+    stockLimit: Number.isFinite(stockLimit) && stockLimit > 0 ? stockLimit : 99
+  };
+}
+
+function mergeCartItems(items) {
+  const merged = new Map();
+  items.forEach((rawItem) => {
+    const item = normalizeCartItem(rawItem);
+    const pid = item.productId;
+    const existing = merged.get(pid);
+    if (existing) {
+      existing.quantity = Number(existing.quantity) + Number(item.quantity);
+      existing.stockLimit = Math.max(existing.stockLimit, item.stockLimit);
+    } else {
+      merged.set(pid, item);
+    }
+  });
+  return Array.from(merged.values());
+}
+
+// Carga configuración pública del backend (Stripe, OAuth, pagos)
+async function loadPublicConfig() {
   try {
     const cfg = await API.get('/config/public');
+    AppState.publicConfig = cfg;
     if (cfg && cfg.publishableKey && window.Stripe) {
       AppState.stripePublishableKey = cfg.publishableKey;
       AppState.stripe = window.Stripe(cfg.publishableKey);
       const mode = (cfg.environment === 'production') ? 'live' : 'sandbox';
       console.log(`[Stripe] Inicializado con clave pública (${mode}).`);
     }
+    return cfg;
   } catch (e) {
-    console.warn('[Stripe] No se pudo cargar configuración pública. Usando simulación para métodos no-tarjeta.');
+    console.warn('[Config] No se pudo cargar configuración pública.', e);
+    return null;
   }
+}
+
+async function loadStripeConfig() {
+  return loadPublicConfig();
 }
 
 function destroyStripeCardElement() {
@@ -130,7 +170,8 @@ const CartManager = {
     const savedCart = localStorage.getItem('aero_cart');
     if (savedCart) {
       try {
-        AppState.cart = JSON.parse(savedCart);
+        const parsed = JSON.parse(savedCart);
+        AppState.cart = Array.isArray(parsed) ? mergeCartItems(parsed) : [];
       } catch (e) {
         AppState.cart = [];
       }
@@ -148,23 +189,25 @@ const CartManager = {
   },
 
   addToCart(product, quantity = 1) {
-    const existing = AppState.cart.find(item => item.productId === product.id);
-    const qty = parseInt(quantity);
+    const productId = normalizeProductId(product.id);
+    const existing = AppState.cart.find(item => normalizeProductId(item.productId) === productId);
+    const qty = Number(quantity) || 1;
     
     if (existing) {
-      if (existing.quantity + qty > product.stock) {
+      const nextQty = Number(existing.quantity) + qty;
+      if (nextQty > product.stock) {
         showToast(`Lo sentimos, solo quedan ${product.stock} unidades en inventario.`, 'error');
         return;
       }
-      existing.quantity += qty;
+      existing.quantity = nextQty;
     } else {
       AppState.cart.push({
-        productId: product.id,
+        productId,
         name: product.name,
-        price: product.price,
+        price: Number(product.price),
         image_url: product.image_url,
         quantity: qty,
-        stockLimit: product.stock
+        stockLimit: Number(product.stock)
       });
     }
     this.save();
@@ -172,33 +215,69 @@ const CartManager = {
   },
 
   removeFromCart(productId) {
-    AppState.cart = AppState.cart.filter(item => item.productId !== productId);
+    const normalizedId = normalizeProductId(productId);
+    const before = AppState.cart.length;
+    AppState.cart = AppState.cart.filter(item => normalizeProductId(item.productId) !== normalizedId);
     this.save();
-    showToast('Producto eliminado del carrito', 'info');
+    if (AppState.cart.length < before) {
+      showToast('Producto eliminado del carrito', 'info');
+    } else {
+      showToast('No se pudo eliminar el producto del carrito.', 'error');
+    }
   },
 
-  updateQuantity(productId, newQty) {
-    const item = AppState.cart.find(i => i.productId === productId);
-    if (item) {
-      const qty = parseInt(newQty);
-      if (qty <= 0) {
-        this.removeFromCart(productId);
-        return;
-      }
-      if (qty > item.stockLimit) {
-        showToast(`Stock máximo alcanzado (${item.stockLimit} unidades disponibles)`, 'error');
-        item.quantity = item.stockLimit;
-      } else {
-        item.quantity = qty;
-      }
-      this.save();
+  async syncItemStock(item) {
+    try {
+      const product = await API.get(`/products/${normalizeProductId(item.productId)}`);
+      item.stockLimit = Number(product.stock) || 0;
+      item.price = Number(product.price) || item.price;
+      item.name = product.name || item.name;
+      item.image_url = product.image_url || item.image_url;
+      return item.stockLimit;
+    } catch (_) {
+      return Number(item.stockLimit) || 0;
     }
+  },
+
+  async refreshCartStock() {
+    if (AppState.cart.length === 0) return;
+    await Promise.all(AppState.cart.map((item) => this.syncItemStock(item)));
+    this.save();
+  },
+
+  async updateQuantity(productId, newQty) {
+    const normalizedId = normalizeProductId(productId);
+    const item = AppState.cart.find(i => normalizeProductId(i.productId) === normalizedId);
+    if (!item) return;
+
+    await this.syncItemStock(item);
+
+    const qty = Number(newQty);
+    if (!Number.isFinite(qty) || qty <= 0) {
+      this.removeFromCart(normalizedId);
+      return;
+    }
+
+    if (item.stockLimit <= 0) {
+      showToast('Este producto ya no tiene stock disponible.', 'error');
+      this.removeFromCart(normalizedId);
+      return;
+    }
+
+    if (qty > item.stockLimit) {
+      showToast(`Stock máximo alcanzado (${item.stockLimit} unidades disponibles)`, 'error');
+      item.quantity = item.stockLimit;
+    } else {
+      item.quantity = qty;
+    }
+    this.save();
   },
 
   clear() {
     AppState.cart = [];
     AppState.appliedCoupon = null;
     this.save();
+    showToast('Carrito vaciado', 'info');
   },
 
   calculateTotals() {
@@ -258,19 +337,20 @@ const CartManager = {
         <div class="cart-item-details">
           <h4 class="cart-item-title">${escapeHtml(item.name)}</h4>
           <div class="cart-item-price-row">
-            <div class="qty-selector" style="border-radius: 4px;">
-              <button class="qty-btn drawer-qty-minus" data-id="${item.productId}" style="width:24px; height:24px; font-size:0.75rem;"><i class="fa-solid fa-minus"></i></button>
-              <input type="number" class="qty-input drawer-qty-input" data-id="${item.productId}" value="${item.quantity}" style="width:30px; height:24px; font-size:0.85rem;" readonly>
-              <button class="qty-btn drawer-qty-plus" data-id="${item.productId}" style="width:24px; height:24px; font-size:0.75rem;"><i class="fa-solid fa-plus"></i></button>
+            <div class="qty-selector">
+              <button type="button" class="qty-btn drawer-qty-minus" data-id="${item.productId}" aria-label="Disminuir cantidad"><i class="fa-solid fa-minus"></i></button>
+              <input type="number" class="qty-input drawer-qty-input" data-id="${item.productId}" value="${item.quantity}" min="1" max="${item.stockLimit}" aria-label="Cantidad">
+              <button type="button" class="qty-btn drawer-qty-plus" data-id="${item.productId}" aria-label="Aumentar cantidad"><i class="fa-solid fa-plus"></i></button>
             </div>
             <span class="cart-item-price">${Views.formatCurrency(item.price * item.quantity)}</span>
-            <button class="remove-cart-item drawer-item-remove" data-id="${item.productId}"><i class="fa-solid fa-trash"></i></button>
+            <button type="button" class="remove-cart-item drawer-item-remove" data-id="${item.productId}" aria-label="Eliminar producto"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
       </div>
     `).join('');
 
     container.innerHTML = itemsHtml;
+    bindCartItemEvents();
     
     // Totales
     const { subtotal, discount, total } = this.calculateTotals();
@@ -413,6 +493,12 @@ async function router() {
   const appContainer = document.getElementById('app');
   
   if (!appContainer) return;
+
+  if (await handleOAuthCallbackFromHash()) {
+    updateNavbarAuthUI();
+    highlightActiveNav();
+    return;
+  }
 
   const isAuthRoute = hash === '#login' || hash === '#register';
   setAuthLayout(isAuthRoute);
@@ -696,32 +782,92 @@ function setupDetailEvents(product) {
   }
 }
 
-// --- Vista Login ---
-async function handleOAuthLogin(provider, btn) {
-  showAuthError('login-error', '');
-  setOAuthLoading(btn, true);
+// --- OAuth: Google / Apple (redirect Passport → callback en #oauth/callback) ---
+function handleSocialLogin(provider, errorElementId, btn) {
+  if (provider !== 'google' && provider !== 'apple') {
+    showToast('Proveedor de inicio de sesión no válido.', 'error');
+    return;
+  }
+
+  showAuthError(errorElementId, '');
+  if (btn) setOAuthLoading(btn, true);
+
+  // Misma origen que el servidor (p. ej. http://localhost:5000/auth/google)
+  window.location.href = `${window.location.origin}/auth/${provider}`;
+}
+
+async function fetchOAuthUserProfile(token) {
+  const response = await fetch(`${window.location.origin}/api/auth/me`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'No se pudo validar la sesión OAuth.');
+  }
+  return data.user;
+}
+
+async function handleOAuthCallbackFromHash() {
+  const hash = window.location.hash || '';
+  if (!hash.startsWith('#oauth/callback')) return false;
+
+  const query = hash.includes('?') ? hash.split('?')[1] : '';
+  const params = new URLSearchParams(query);
+  const error = params.get('error');
+  const token = params.get('token');
+  const isNew = params.get('new') === '1';
+  const provider = params.get('provider') || 'oauth';
+
+  if (error) {
+    showToast(decodeURIComponent(error), 'error');
+    window.location.hash = '#login';
+    return true;
+  }
+
+  if (!token) {
+    showToast('No se recibió token de autenticación.', 'error');
+    window.location.hash = '#login';
+    return true;
+  }
+
   try {
-    const mockUser = provider === 'google'
-      ? { provider: 'google', email: 'google-user@gmail.com', fullName: 'Google User Test', providerId: 'google-123456789' }
-      : { provider: 'apple', email: 'apple-client@icloud.com', fullName: 'Apple Customer Test', providerId: 'apple-987654321' };
-    const res = await API.post('/auth/oauth', mockUser);
-    Auth.setSession(res.token, res.user);
-    showToast(res.message, 'success');
+    const user = await fetchOAuthUserProfile(token);
+    Auth.setSession(token, user);
+    const label = provider === 'apple' ? 'Apple' : provider === 'google' ? 'Google' : 'OAuth';
+    showToast(
+      isNew ? `Cuenta creada con ${label}. ¡Bienvenido!` : `Sesión iniciada con ${label}`,
+      'success'
+    );
     window.location.hash = '#';
   } catch (err) {
-    const msg = err.message || 'No se pudo iniciar sesión con el proveedor seleccionado.';
-    showAuthError('login-error', msg);
-    showToast(msg, 'error');
-  } finally {
-    setOAuthLoading(btn, false);
+    showToast(err.message || 'Error al completar OAuth.', 'error');
+    window.location.hash = '#login';
+  }
+
+  return true;
+}
+
+function setupOAuthEvents(errorElementId) {
+  const googleBtn = document.getElementById('btn-google-login');
+  const appleBtn = document.getElementById('btn-apple-login');
+
+  if (googleBtn) {
+    googleBtn.addEventListener('click', () => handleSocialLogin('google', errorElementId, googleBtn));
+  }
+  if (appleBtn) {
+    appleBtn.addEventListener('click', () => handleSocialLogin('apple', errorElementId, appleBtn));
   }
 }
 
 function setupLoginEvents() {
   const form = document.getElementById('login-form');
-  const googleBtn = document.getElementById('btn-google-login');
-  const appleBtn = document.getElementById('btn-apple-login');
   const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+  setupOAuthEvents('login-error');
 
   if (form) {
     form.addEventListener('submit', async (e) => {
@@ -751,17 +897,12 @@ function setupLoginEvents() {
     });
   }
 
-  if (googleBtn) {
-    googleBtn.addEventListener('click', () => handleOAuthLogin('google', googleBtn));
-  }
-
-  if (appleBtn) {
-    appleBtn.addEventListener('click', () => handleOAuthLogin('apple', appleBtn));
-  }
 }
 
 // --- Vista Registro ---
 function setupRegisterEvents() {
+  setupOAuthEvents('register-error');
+
   const form = document.getElementById('register-form');
   if (form) {
     form.addEventListener('submit', async (e) => {
@@ -1532,6 +1673,53 @@ function openRefundModal(refundId, action) {
   });
 }
 
+function bindCartItemEvents() {
+  const container = document.getElementById('cart-items-container');
+  if (!container) return;
+
+  container.querySelectorAll('.drawer-qty-minus').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = normalizeProductId(btn.getAttribute('data-id'));
+      const item = AppState.cart.find(i => normalizeProductId(i.productId) === id);
+      if (item) CartManager.updateQuantity(id, Number(item.quantity) - 1);
+    });
+  });
+
+  container.querySelectorAll('.drawer-qty-plus').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = normalizeProductId(btn.getAttribute('data-id'));
+      const item = AppState.cart.find(i => normalizeProductId(i.productId) === id);
+      if (item) CartManager.updateQuantity(id, Number(item.quantity) + 1);
+    });
+  });
+
+  container.querySelectorAll('.drawer-item-remove').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      CartManager.removeFromCart(normalizeProductId(btn.getAttribute('data-id')));
+    });
+  });
+
+  container.querySelectorAll('.drawer-qty-input').forEach((input) => {
+    input.addEventListener('change', (e) => {
+      e.stopPropagation();
+      const id = normalizeProductId(input.getAttribute('data-id'));
+      CartManager.updateQuantity(id, input.value);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+  });
+}
+
 // ==========================================================================
 // 7. Configuración de Elementos del Layout Global (Navbar & Event Listeners)
 // ==========================================================================
@@ -1545,8 +1733,8 @@ function setupGlobalUI() {
   
   // Abrir / Cerrar Carrito Drawer
   if (cartTrigger && cartOverlay) {
-    cartTrigger.addEventListener('click', () => {
-      CartManager.updateUI();
+    cartTrigger.addEventListener('click', async () => {
+      await CartManager.refreshCartStock();
       cartOverlay.classList.add('open');
     });
   }
@@ -1565,29 +1753,10 @@ function setupGlobalUI() {
     });
   }
 
-  // Delegar eventos dentro del Drawer del Carrito (cantidad y eliminar)
   const cartDrawerBody = document.getElementById('cart-items-container');
   if (cartDrawerBody) {
     cartDrawerBody.addEventListener('click', (e) => {
-      const btnMinus = e.target.closest('.drawer-qty-minus');
-      const btnPlus = e.target.closest('.drawer-qty-plus');
-      const btnRemove = e.target.closest('.drawer-item-remove');
       const backToShopBtn = e.target.closest('#cart-back-to-shop-btn');
-
-      if (btnMinus) {
-        const id = parseInt(btnMinus.getAttribute('data-id'));
-        const item = AppState.cart.find(i => i.productId === id);
-        if (item) CartManager.updateQuantity(id, item.quantity - 1);
-      }
-      if (btnPlus) {
-        const id = parseInt(btnPlus.getAttribute('data-id'));
-        const item = AppState.cart.find(i => i.productId === id);
-        if (item) CartManager.updateQuantity(id, item.quantity + 1);
-      }
-      if (btnRemove) {
-        const id = parseInt(btnRemove.getAttribute('data-id'));
-        CartManager.removeFromCart(id);
-      }
       if (backToShopBtn && cartOverlay) {
         cartOverlay.classList.remove('open');
         window.location.hash = '#';
@@ -1600,6 +1769,17 @@ function setupGlobalUI() {
   if (checkoutBtn && cartOverlay) {
     checkoutBtn.addEventListener('click', () => {
       cartOverlay.classList.remove('open');
+    });
+  }
+
+  const clearCartBtn = document.getElementById('btn-cart-clear');
+  if (clearCartBtn) {
+    clearCartBtn.addEventListener('click', () => {
+      if (AppState.cart.length === 0) {
+        showToast('El carrito ya está vacío.', 'info');
+        return;
+      }
+      CartManager.clear();
     });
   }
 
@@ -1759,11 +1939,16 @@ function highlightActiveNav() {
 }
 
 // Inicialización de la Aplicación al arrancar
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   Auth.checkSessionOnLoad();
   CartManager.init();
   setupGlobalUI();
   updateNavbarAuthUI();
+
+  if (await handleOAuthCallbackFromHash()) {
+    highlightActiveNav();
+    return;
+  }
   
   // Escuchar cambios de sesión globales
   window.addEventListener('authChange', () => {

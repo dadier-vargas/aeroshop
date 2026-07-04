@@ -66,6 +66,34 @@ const dbQuery = {
 };
 
 /**
+ * Migración 001 — provider_id y avatar en users.
+ */
+async function runUsersOAuthMigration() {
+  try {
+    const usersInfo = await dbQuery.all('PRAGMA table_info(users);');
+    const columns = usersInfo.map((col) => col.name);
+
+    if (!columns.includes('provider_id')) {
+      await dbQuery.run('ALTER TABLE users ADD COLUMN provider_id TEXT;');
+      console.log('Migración 001: columna provider_id añadida a users.');
+    }
+
+    if (!columns.includes('avatar')) {
+      await dbQuery.run('ALTER TABLE users ADD COLUMN avatar TEXT;');
+      console.log('Migración 001: columna avatar añadida a users.');
+    }
+
+    const migrationPath = path.resolve(__dirname, '../db/migrations/001_add_oauth_user_fields.sql');
+    if (fs.existsSync(migrationPath)) {
+      const migrationSql = fs.readFileSync(migrationPath, 'utf-8');
+      await dbQuery.exec(migrationSql);
+    }
+  } catch (migErr) {
+    console.warn('Nota de migración OAuth users:', migErr.message);
+  }
+}
+
+/**
  * Migra contraseñas demo débiles (admin123/client123) a las credenciales actuales.
  */
 async function migrateLegacyDefaultCredentials() {
@@ -106,6 +134,9 @@ async function initializeDatabase() {
     } catch (migErr) {
       console.warn('Nota de migración (puede ser ignorada si ya existe):', migErr.message);
     }
+
+    // Migración 001: campos OAuth en users (provider_id, avatar)
+    await runUsersOAuthMigration();
 
     // Sembrar datos si la tabla categories está vacía
     const catCheck = await dbQuery.get('SELECT COUNT(*) as count FROM categories');

@@ -365,15 +365,18 @@ const API = {
           }
 
           if (method === 'POST' && endpoint === '/auth/oauth') {
+            if (!body.idToken) {
+              return reject(new Error('Se requiere autenticación real con Google o Apple.'));
+            }
             const users = MockDB.get('users');
-            const email = body.email.toLowerCase();
+            const email = `${body.provider}-user@offline.local`;
             let user = users.find(u => u.email === email);
 
             if (!user) {
               user = {
                 id: users.length + 1,
                 email,
-                full_name: body.fullName,
+                full_name: body.provider === 'google' ? 'Usuario Google' : 'Usuario Apple',
                 role: 'client',
                 auth_provider: body.provider,
                 created_at: new Date().toISOString()
@@ -382,7 +385,7 @@ const API = {
               MockDB.save('users', users);
             }
             return resolve({
-              message: `Inicio de sesión con ${body.provider} exitoso (Simulación)`,
+              message: `Inicio de sesión con ${body.provider} exitoso (Simulación offline)`,
               token: 'mock-jwt-token-' + Math.random().toString(),
               user
             });

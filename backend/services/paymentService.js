@@ -4,7 +4,10 @@
  * Solo disponible fuera de producción (o con ALLOW_SIMULATED_PAYMENTS=true).
  */
 class PaymentService {
-  static isSimulationAllowed() {
+  static isSimulationAllowed(method) {
+    if (method === 'pse' || method === 'wallet') {
+      return true;
+    }
     return (
       process.env.NODE_ENV !== 'production' ||
       process.env.ALLOW_SIMULATED_PAYMENTS === 'true'
@@ -18,7 +21,7 @@ class PaymentService {
    * @returns {Promise<object>} Resultado del pago
    */
   static async processPayment(method, amount, details) {
-    if (!PaymentService.isSimulationAllowed()) {
+    if (!PaymentService.isSimulationAllowed(method)) {
       return {
         success: false,
         status: 'failed',

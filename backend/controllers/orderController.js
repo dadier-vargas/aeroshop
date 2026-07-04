@@ -188,7 +188,7 @@ class OrderController {
           console.error('[Order] Error verificando PaymentIntent de Stripe:', stripeErr.message);
           paymentResult = StripeService.formatStripeError(stripeErr);
         }
-      } else if (PaymentService.isSimulationAllowed()) {
+      } else if (paymentMethod === 'pse' || paymentMethod === 'wallet' || PaymentService.isSimulationAllowed(paymentMethod)) {
         paymentResult = await PaymentService.processPayment(paymentMethod, finalAmount, paymentDetails);
       } else {
         paymentResult = {
